@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,Http404
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from .models import BlogPost
 from .forms import BlogForm
 
@@ -18,9 +19,10 @@ def blogs(request):
 def blog(request,blogs_id):
     '''博文详情'''
     blog=BlogPost.objects.get(id=blogs_id)
-    context={'blog_title':blog.title,'content':blog.text,'date_added':blog.date_added,'blog_id':blog.id}
+    context={'blog':blog}
     return render(request,'blogs_/blog.html',context)
 
+@login_required
 def new_blog(request):
     '''添加新博文'''
     if request.method!='POST':
@@ -28,14 +30,18 @@ def new_blog(request):
     else:
         form=BlogForm(request.POST)
         if form.is_valid():
-            form.save()
+            new_blog=form.save(commit=False)
+            new_blog.owner=request.user
+            new_blog.save()
             return HttpResponseRedirect(reverse('blogs_:blogs'))
     context={'form':form}
     return render(request,'blogs_/new_blog.html',context)
 
+@login_required
 def edit_blog(request,blogs_id):
     '''编辑博文'''
     blog=BlogPost.objects.get(id=blogs_id)
+    check_blog_owner(blog,request)
     if request.method!='POST':
         form=BlogForm(instance=blog)
     else:
@@ -45,3 +51,7 @@ def edit_blog(request,blogs_id):
             return HttpResponseRedirect(reverse('blogs_:blog',args=[blog.id]))
     context={'blog':blog,'form':form}
     return render(request,'blogs_/edit_blog.html',context)
+
+def check_blog_owner(blog,request):
+    if blog.owner!=request.user:
+        raise Http404

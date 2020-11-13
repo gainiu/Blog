@@ -1,12 +1,13 @@
 {% extends 'blogs_/base.html' %}
 
 {% block content %}
-  <p>博文：{{ blog_title }}</p>
+  <p>博文：{{ blog.title }}</p>
   <ul>
     <li>
-      <p>{{ date_added }}</p>
-      <p>{{ content|linebreaks }}</p>
+      <p>{{ blog.date_added }}</p>
+      <p>Author —— {{ blog.owner }}</p>
+      <p>{{ blog.text|linebreaks }}</p>
     </li>
   </ul>
-  <a href="{% url 'blogs_:edit_blog' blog_id %}">Edit Blog</a>
+  <a href="{% url 'blogs_:edit_blog' blog.id %}">Edit Blog</a>
 {% endblock content %}

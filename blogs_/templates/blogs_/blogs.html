@@ -9,5 +9,7 @@
       <li>No blog have been added yet.</li>
     {% endfor %}
   </ul>
-  <a href="{% url 'blogs_:new_blog' %}">Add a new Blog</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'blogs_:new_blog' %}">Add a new Blog</a>
+  {% endif %}
 {% endblock content %}
